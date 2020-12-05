@@ -18,6 +18,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 import tensorflow_datasets as tfds
+import stationery_dataset
 
 import sys
 if sys.platform != 'darwin':
@@ -50,6 +51,13 @@ DATASET_PRESETS = {
         'resize': 384,
         'crop': 384,
         'total_steps': 20_000,
+    },
+    'stationery': {
+        'train': 'train[:98%]',
+        'test': 'test',
+        'resize': 384,
+        'crop': 384,
+        'total_steps': 10_000,
     },
 }
 
@@ -101,14 +109,19 @@ def get_data(*,
   split = preset[mode]
   resize_size = preset['resize']
   crop_size = preset['crop']
-  data_builder = tfds.builder(dataset, data_dir=tfds_data_dir)
-  dataset_info = get_dataset_info(dataset, split)
 
-  data_builder.download_and_prepare(
-      download_config=tfds.download.DownloadConfig(manual_dir=tfds_manual_dir))
-  data = data_builder.as_dataset(
-      split=split, decoders={'image': tfds.decode.SkipDecoding()})
-  decoder = data_builder.info.features['image'].decode_example
+  if dataset=='stationery':
+    data=stationery_dataset.crate_dataset(tfds_data_dir)
+    decoder = lambda x: x
+  else:
+    data_builder = tfds.builder(dataset, data_dir=tfds_data_dir)
+    dataset_info = get_dataset_info(dataset, split)
+
+    data_builder.download_and_prepare(
+        download_config=tfds.download.DownloadConfig(manual_dir=tfds_manual_dir))
+    data = data_builder.as_dataset(
+        split=split, decoders={'image': tfds.decode.SkipDecoding()})
+    decoder = data_builder.info.features['image'].decode_example
 
   def _pp(data):
     im = decoder(data['image'])
