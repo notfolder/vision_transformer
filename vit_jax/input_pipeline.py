@@ -18,7 +18,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 import tensorflow_datasets as tfds
-import stationery_dataset
+from vit_jax import stationery_dataset
 
 import sys
 if sys.platform != 'darwin':
@@ -63,6 +63,9 @@ DATASET_PRESETS = {
 
 
 def get_dataset_info(dataset, split):
+  if dataset=='stationery':
+      return {'num_examples': 605, 'num_classes': 8}
+
   data_builder = tfds.builder(dataset)
   num_examples = data_builder.info.splits[split].num_examples
   num_classes = data_builder.info.features['label'].num_classes
@@ -113,6 +116,7 @@ def get_data(*,
   if dataset=='stationery':
     data=stationery_dataset.crate_dataset(tfds_data_dir)
     decoder = lambda x: x
+    dataset_info = get_dataset_info(dataset, split)
   else:
     data_builder = tfds.builder(dataset, data_dir=tfds_data_dir)
     dataset_info = get_dataset_info(dataset, split)

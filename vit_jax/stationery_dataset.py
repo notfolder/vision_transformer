@@ -1,4 +1,3 @@
-import input_pipeline
 import tensorflow as tf
 import pathlib
 import tensorflow_datasets as tfds
@@ -18,7 +17,7 @@ def preprocess_image(image):
 
 def crate_dataset(path):
     AUTOTUNE = tf.data.experimental.AUTOTUNE
-    data_root = pathlib.Path('./data')
+    data_root = pathlib.Path(path)
     all_image_paths = list(data_root.glob('*/*'))
     all_image_paths = [str(path) for path in all_image_paths]
     label_names = sorted(
